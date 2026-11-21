@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>
+  <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ff7a7a"/><stop offset="100%" stop-color="#c91e32"/></linearGradient>
+  <linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#80f2ff"/><stop offset="100%" stop-color="#1e6ec9"/></linearGradient>
+  <linearGradient id="g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#7ef7be"/><stop offset="100%" stop-color="#148a52"/></linearGradient>
+  <linearGradient id="g4" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fff094"/><stop offset="100%" stop-color="#d46b15"/></linearGradient>
+</defs><rect x="8" y="34" width="48" height="16" rx="7" fill="#3a4454" stroke="#0c0f15" stroke-width="3"/><path d="M16 34 L22 22 H44 L50 34 Z" fill="url(#g4)" stroke="#0c0f15" stroke-width="3"/><rect x="38" y="20" width="22" height="7" rx="2" fill="#262e3b" stroke="#0c0f15" stroke-width="2.5"/><circle cx="18" cy="42" r="4" fill="#ffe066"/><circle cx="32" cy="42" r="4" fill="#ffe066"/><circle cx="46" cy="42" r="4" fill="#ffe066"/></svg>

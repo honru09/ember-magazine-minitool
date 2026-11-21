@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>余烬弹匣：末日突围</title>
+  <link rel="stylesheet" href="styles.css?v=6" />
+</head>
+<body>
+  <div id="stage-root">
+    <div id="stage-safe">
+      <!-- ==================== 强制全量资源预加载界面（多张高清插画轮换封面） ==================== -->
+      <section id="screen-preload" class="screen active">
+        <div id="preload-cover" class="preload-cover"></div>
+        <div class="preload-vignette"></div>
+        <div class="preload-inner">
+          <div id="preload-cover-tag" class="preload-cover-tag">档案封面 01 · 断桥双雄对峙</div>
+          <img class="preload-logo" src="assets/ui/logo_ember.webp" alt="余烬弹匣：末日突围" />
+          <div class="preload-box">
+            <div class="preload-meta">
+              <span id="preload-status">正在强制预加载全部高清精灵、25把神枪与地图...</span>
+              <b id="preload-pct">0%</b>
+            </div>
+            <div class="preload-track">
+              <div id="preload-fill" class="preload-fill"></div>
+            </div>
+            <div id="preload-tip" class="preload-tip">战术贴士：击溃首领后将触发 5 秒全图战利品自动飞回吸取，绝不漏捡神枪！</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 新用户初始四选一永久锁定界面 ==================== -->
+      <section id="screen-select-hero" class="screen">
+        <div class="select-hero-shell">
+          <div class="select-hero-head">
+            <div class="select-hero-title">选择你的初始幸存者（四选一 · 选定后不可更换）</div>
+            <div class="select-hero-sub">开局仅持制式小手枪白手起家 · 账号 Lv.10 解锁无人机，Lv.20 可从其余三位中招募专属伙伴！</div>
+          </div>
+          <div id="starter-hero-grid" class="starter-hero-grid"></div>
+          <div class="select-hero-foot">
+            <button id="btn-confirm-starter" class="btn-metal btn-primary" type="button">确认选择并永久锁定此角色</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 营地主界面与个人角色装备中心 ==================== -->
+      <section id="screen-title" class="screen">
+        <div id="title-bg" class="title-bg"></div>
+        <div class="title-vignette"></div>
+
+        <!-- 顶部资源条（右侧预留安全净空） -->
+        <header class="title-topbar">
+          <div class="res-strip">
+            <div class="res-pill"><img src="assets/icons/ic_stone.svg" alt="" /><span>强化石 <b id="title-stones">0</b></span></div>
+            <div class="res-pill"><img src="assets/icons/ic_chip.svg" alt="" /><span>碎片 <b id="title-chips">0</b></span></div>
+            <div class="res-pill res-merit"><img src="assets/icons/ic_tank.svg" alt="" /><span>战功 <b id="title-merit">0</b></span></div>
+            <div class="res-pill res-score"><img src="assets/icons/ic_star.svg" alt="" /><span>最高 <b id="title-best">0</b></span></div>
+          </div>
+        </header>
+
+        <!-- 主页双栏融合布局：左侧个人角色装备面板 + 右侧营地出击区 -->
+        <div class="home-shell">
+          <!-- 左栏：个人角色与六格装备面板 -->
+          <div class="paperdoll-panel">
+            <div class="pd-header">
+              <div class="pd-head-left">
+                <div class="pd-name-line">
+                  <span id="pd-hero-name" class="pd-hero-name">陈烬 · 前消防特勤</span>
+                  <span id="pd-title-badge" class="pd-title-badge hidden">开创者</span>
+                </div>
+                <div class="pd-acc-row">
+                  <span id="pd-acc-lv" class="pd-acc-lv">账号 Lv.1</span>
+                  <div class="pd-xp-track"><div id="pd-xp-fill" class="pd-xp-fill"></div></div>
+                  <span id="pd-xp-text" class="pd-xp-text">0/120</span>
+                </div>
+              </div>
+              <div class="pd-power-badge">
+                <span>综合评分</span>
+                <div class="pd-power-line"><span id="pd-power-grade" class="grade-badge">D</span><b id="pd-power-val">0</b></div>
+              </div>
+            </div>
+
+            <div class="pd-body">
+              <!-- 左侧 3 装备格：主枪 / 副枪 / 防弹甲（支持单槽真实穿卸 + 点击换装/强化） -->
+              <div class="pd-col">
+                <div class="eq-slot rar-green" id="eq-primary" data-eq="primary"></div>
+                <div class="eq-slot rar-blue" id="eq-secondary" data-eq="secondary"></div>
+                <div class="eq-slot rar-white" id="eq-armor" data-eq="armor"></div>
+              </div>
+
+              <!-- 中央魔兽式全身站立舞台（60FPS 实时穿卸头盔/重甲/核心光翼/背负副枪/手持主枪/浮游炮！） -->
+              <div class="pd-center">
+                <canvas id="pd-hero-canvas" class="pd-hero-canvas"></canvas>
+                <div class="pd-stage-tools">
+                  <button id="btn-pd-strip-toggle" class="pd-stage-btn" type="button">一键脱装</button>
+                </div>
+                <div id="pd-stage-caption" class="pd-stage-caption">已穿戴 6/6 · 点槽位角标穿卸</div>
+              </div>
+
+              <!-- 右侧 3 装备格：战术盔 / 核心芯 / 破晓战车 -->
+              <div class="pd-col">
+                <div class="eq-slot rar-white" id="eq-helmet" data-eq="helmet"></div>
+                <div class="eq-slot rar-white" id="eq-chip" data-eq="chip"></div>
+                <div class="eq-slot rar-blue" id="eq-warcar" data-eq="warcar"></div>
+              </div>
+            </div>
+
+            <!-- 个人四维核心属性条 -->
+            <div class="pd-stats">
+              <div class="pd-stat"><span>生命</span><b id="pd-st-hp">360</b></div>
+              <div class="pd-stat"><span>秒伤</span><b id="pd-st-dps">0</b></div>
+              <div class="pd-stat"><span>暴击</span><b id="pd-st-crit">16%</b></div>
+              <div class="pd-stat"><span>破甲</span><b id="pd-st-pen">15%</b></div>
+            </div>
+          </div>
+
+          <!-- 右栏：品牌主视觉 + 个人成长里程碑(称号/10级无人机/20级伙伴) + 章节预览 + 出击控制栏 -->
+          <div class="command-panel">
+            <img class="title-logo" src="assets/ui/logo_ember.webp" alt="余烬弹匣：末日突围" />
+            <div class="title-tagline">七日孤城 · 硬核高密度尸潮肉鸽突围</div>
+
+            <!-- 局外成长里程碑条：称号佩戴 / Lv.10 无人机 / Lv.20 伙伴 -->
+            <div class="growth-strip">
+              <button id="btn-open-titles" class="growth-card" type="button">
+                <span class="gc-k">佩戴称号</span>
+                <b id="gc-title-val" class="gc-v">暂无称号</b>
+              </button>
+              <button id="btn-open-drones" class="growth-card" type="button">
+                <span class="gc-k">重工军需·无人机</span>
+                <b id="gc-drone-val" class="gc-v">战功点购置</b>
+              </button>
+              <button id="btn-open-partner" class="growth-card" type="button">
+                <span class="gc-k">专属伙伴（Lv.20）</span>
+                <b id="gc-partner-val" class="gc-v">Lv.20 解锁</b>
+              </button>
+            </div>
+
+            <!-- 当前剧情章节预览卡片 -->
+            <button id="home-chapter-card" class="home-chapter-card" type="button">
+              <img id="home-ch-thumb" class="home-ch-thumb" src="assets/map/ch1_bridge.webp" alt="" />
+              <div class="home-ch-info">
+                <div id="home-ch-title" class="home-ch-title">第 1 集 · 断桥夜雨</div>
+                <div id="home-ch-sub" class="home-ch-sub">新手启程 · 首领：巨像「铁镐·47号」</div>
+              </div>
+              <span class="home-ch-btn">切换</span>
+            </button>
+
+            <!-- 底部战术按钮区 -->
+            <div class="title-actions">
+              <button id="btn-start" class="btn-metal btn-primary" type="button">开始突围</button>
+              <button id="btn-armory" class="btn-metal" type="button">装备库</button>
+              <button id="btn-chapters" class="btn-metal" type="button">战役地图</button>
+              <button id="btn-talent" class="btn-metal" type="button">天赋树</button>
+              <button id="btn-codex" class="btn-metal" type="button">藏品图鉴</button>
+              <button id="btn-rank" class="btn-metal" type="button">战力榜</button>
+              <button id="btn-follow" class="btn-metal btn-gold" type="button">关注有礼</button>
+              <button id="btn-title-settings" class="btn-metal" type="button">设置</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 战斗主画布与 HUD ==================== -->
+      <section id="screen-game" class="screen">
+        <canvas id="game-canvas"></canvas>
+
+        <!-- 顶部 HUD（横屏右侧强制 padding-right: 118px，绝不与右上角胶囊重叠） -->
+        <div class="hud-top">
+          <div class="hud-hero-box">
+            <div class="hud-avatar-wrap">
+              <img id="hud-avatar" src="assets/sheets/p_chen.webp" alt="" />
+              <span id="hud-lv" class="hud-lv-badge">Lv.1</span>
+            </div>
+            <div class="hud-bars">
+              <div class="hud-hero-line">
+                <span id="hud-hero-name" class="hud-hero-name">陈烬</span>
+                <span id="hud-diff-tag" class="hud-diff-tag">标准生存</span>
+              </div>
+              <div class="bar-track bar-hp">
+                <div id="hud-hp-fill" class="bar-fill"></div>
+                <span id="hud-hp-text" class="bar-text">360/360</span>
+              </div>
+              <div class="bar-track bar-shield">
+                <div id="hud-sh-fill" class="bar-fill"></div>
+                <span id="hud-sh-text" class="bar-text">护盾 0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="hud-mid-pills">
+            <div class="hud-pill"><span id="hud-wave">第 1 集 · 第 1 波</span></div>
+            <div class="hud-pill"><img src="assets/icons/ic_skull.svg" alt="" /><span id="hud-kills">0</span></div>
+            <div class="hud-pill"><img src="assets/icons/ic_stone.svg" alt="" /><span id="hud-run-stones">35</span></div>
+            <div class="hud-pill hud-fps hidden" id="hud-fps">60 FPS</div>
+          </div>
+
+          <div class="hud-controls">
+            <button id="btn-game-bag" class="hud-btn hud-btn-gold" type="button">装备</button>
+            <button id="btn-autofire" class="hud-btn active" type="button">自动瞄射</button>
+            <button id="btn-pause" class="hud-btn" type="button">暂停</button>
+            <button id="btn-game-settings" class="hud-btn" type="button">设置</button>
+            <button id="btn-retreat" class="hud-btn hud-btn-danger" type="button">撤退</button>
+          </div>
+        </div>
+
+        <!-- 连杀爽感徽章 -->
+        <div id="hud-combo" class="hud-combo hidden">
+          <b id="combo-num">12</b><span>连杀! 火力飙升</span>
+        </div>
+
+        <!-- Boss 顶部血条 -->
+        <div id="boss-bar" class="boss-bar hidden">
+          <div class="boss-bar-head">
+            <span id="boss-name" class="boss-name">巨像「铁镐·47号」</span>
+            <span id="boss-rage-tag" class="boss-rage-tag hidden">狂暴二阶段!</span>
+          </div>
+          <div class="boss-hp-track">
+            <div id="boss-hp-fill" class="boss-hp-fill"></div>
+            <span id="boss-hp-text" class="boss-hp-text">5200 / 5200</span>
+          </div>
+        </div>
+
+        <!-- 5 秒全图战利品自动吸取收尾倒计时条 -->
+        <div id="loot-vacuum-bar" class="loot-vacuum-bar hidden">
+          <span id="loot-vacuum-text">首领击溃！全图战利品自动吸取入库（5s）</span>
+          <button id="btn-finish-loot" class="btn-mini btn-mini-gold" type="button">立刻结算</button>
+        </div>
+
+        <!-- 波次横幅 -->
+        <div id="wave-banner" class="wave-banner hidden">第 1 波 · 断桥夜雨尸潮来袭！</div>
+
+        <!-- 极品神枪掉落即时队列对比弹窗（绝不覆盖上一把武器！） -->
+        <div id="loot-card" class="loot-card hidden">
+          <div id="loot-queue-bar" class="loot-queue-bar hidden">待处理神枪（1 / 1）</div>
+          <div class="loot-head">
+            <div id="loot-rarity-frame" class="loot-frame-box rar-orange">
+              <img id="loot-gun-img" class="loot-gun-img" src="assets/guns/w_m4.webp" alt="" />
+            </div>
+            <div class="loot-meta">
+              <div id="loot-name" class="loot-name">传说 · 猩焰重炮</div>
+              <div id="loot-power" class="loot-power">战力 1280（+340）</div>
+              <div id="loot-affix" class="loot-affix">暴击率+14% · 烈焰灼烧</div>
+            </div>
+          </div>
+          <div class="loot-actions">
+            <button id="btn-loot-equip" class="btn-mini btn-mini-gold" type="button">立刻装备</button>
+            <button id="btn-loot-stash" class="btn-mini" type="button">收入背包</button>
+            <button id="btn-loot-salvage" class="btn-mini btn-mini-danger" type="button">熔炼</button>
+          </div>
+        </div>
+
+        <!-- 底部双侧简约手游按键操纵区（左：左/下/右方向键 + 战车；右：武器/技能 + 跳跃 & 攻击键；按住下+跳跃=下台！） -->
+        <div class="hud-bottom">
+          <div class="hud-left-pad">
+            <div class="left-pad-stack">
+              <button id="btn-warcar" class="tac-btn tac-car" type="button">
+                <img src="assets/icons/ic_tank.svg" alt="" />
+                <span id="warcar-text">战车 30%</span>
+              </button>
+              <div class="dpad-row">
+                <button id="btn-move-left" class="ctrl-key" type="button" aria-label="向左移动">
+                  <img src="assets/icons/ctrl_left.svg" alt="" />
+                </button>
+                <button id="btn-move-down" class="ctrl-key ctrl-key-down" type="button" aria-label="按住下搭配跳跃下台">
+                  <img src="assets/icons/ctrl_down.svg" alt="" />
+                  <span class="ctrl-key-hint">下</span>
+                </button>
+                <button id="btn-move-right" class="ctrl-key" type="button" aria-label="向右移动">
+                  <img src="assets/icons/ctrl_right.svg" alt="" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="hud-right-pad">
+            <div class="weapon-dock">
+              <button id="btn-weapon-swap" class="weapon-card rar-white" type="button">
+                <img id="hud-gun-svg" class="hud-gun-svg" src="assets/guns/w_pistol_init.webp" alt="" />
+                <div class="weapon-card-info">
+                  <div id="hud-gun-name" class="hud-gun-name">制式小手枪 +0</div>
+                  <div id="hud-gun-ammo" class="hud-gun-ammo">弹匣 12/12 · 点击切枪</div>
+                </div>
+              </button>
+              <button id="btn-run-enhance" class="btn-enhance-run" type="button">
+                <span>强化</span>
+                <small id="run-enh-cost">15石</small>
+              </button>
+            </div>
+
+            <div class="right-action-row">
+              <div class="skill-bar">
+                <button class="skill-btn" data-skill="crazy" type="button">
+                  <img class="skill-frame-img" src="assets/frames/skill_frame.svg" alt="" />
+                  <img class="skill-icon-img" src="assets/skills/sk_crazy.webp" alt="" />
+                  <span class="skill-cd hidden" id="cd-crazy"></span>
+                  <span class="skill-label">狂暴</span>
+                </button>
+                <button class="skill-btn" data-skill="missile" type="button">
+                  <img class="skill-frame-img" src="assets/frames/skill_frame.svg" alt="" />
+                  <img class="skill-icon-img" src="assets/skills/sk_missile.webp" alt="" />
+                  <span class="skill-cd hidden" id="cd-missile"></span>
+                  <span class="skill-label">万弹</span>
+                </button>
+                <button class="skill-btn" data-skill="heal" type="button">
+                  <img class="skill-frame-img" src="assets/frames/skill_frame.svg" alt="" />
+                  <img class="skill-icon-img" src="assets/skills/sk_heal.webp" alt="" />
+                  <span class="skill-cd hidden" id="cd-heal"></span>
+                  <span class="skill-label">圣光</span>
+                </button>
+                <button class="skill-btn skill-btn-ult" data-skill="nuke" type="button">
+                  <img class="skill-frame-img" src="assets/frames/skill_frame_gold.svg" alt="" />
+                  <img class="skill-icon-img" src="assets/skills/sk_nuke.webp" alt="" />
+                  <span class="skill-cd hidden" id="cd-nuke"></span>
+                  <span class="skill-label">核爆</span>
+                </button>
+              </div>
+              <div class="action-pad">
+                <button id="btn-jump" class="ctrl-act ctrl-act-jump" type="button" aria-label="跳跃或按住下下台">
+                  <img src="assets/icons/ctrl_jump.svg" alt="" />
+                  <span>跳跃</span>
+                </button>
+                <button id="btn-attack" class="ctrl-act ctrl-act-fire" type="button" aria-label="开火攻击">
+                  <img src="assets/icons/ctrl_fire.svg" alt="" />
+                  <span>攻击</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 电视剧级宽银幕剧情对话覆层 -->
+        <div id="story-overlay" class="story-overlay hidden">
+          <div class="story-letterbox-top"></div>
+          <div class="story-box">
+            <div class="story-portrait-wrap">
+              <img id="story-portrait" src="assets/sheets/p_chen.webp" alt="" />
+            </div>
+            <div class="story-body">
+              <div class="story-meta">
+                <span id="story-speaker" class="story-speaker">陈烬</span>
+                <span id="story-ep-tag" class="story-ep-tag">第 1 集 · 断桥夜雨</span>
+              </div>
+              <p id="story-text" class="story-text"></p>
+            </div>
+            <div class="story-btns">
+              <button id="btn-story-next" class="btn-metal btn-primary" type="button">继续</button>
+              <button id="btn-story-skip" class="btn-metal" type="button">跳过</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 战术模态弹窗系统 ==================== -->
+      <!-- 1. 孤城全域手绘战略战役地图 -->
+      <div id="modal-chapters" class="modal hidden">
+        <div class="modal-panel modal-wide world-map-panel">
+          <div class="modal-header">
+            <div class="modal-title">七日孤城 · 全域手绘推进战役地图</div>
+            <div class="armory-top-right">
+              <div id="diff-bar" class="diff-bar-inline"></div>
+              <button class="modal-close" data-close="modal-chapters" type="button">关闭</button>
+            </div>
+          </div>
+          <div id="world-map-stage" class="world-map-stage">
+            <img class="world-map-bg" src="assets/map/world_campaign_map.webp" alt="七日孤城全域战役地图" />
+            <svg id="world-map-routes" class="world-map-routes" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+            <div id="world-map-nodes" class="world-map-nodes"></div>
+          </div>
+          <div id="world-map-brief" class="world-map-brief"></div>
+        </div>
+      </div>
+
+      <!-- 2. 双栏战术军械库 -->
+      <div id="modal-armory" class="modal hidden">
+        <div class="modal-panel modal-wide">
+          <div class="modal-header">
+            <div class="modal-title">战术军械库与锻造工坊</div>
+            <div class="armory-top-right">
+              <div class="armory-tabs">
+                <button id="tab-bag" class="tab-btn active" type="button">武器</button>
+                <button id="tab-gear" class="tab-btn" type="button">防具</button>
+                <button id="tab-forge" class="tab-btn" type="button">锻造</button>
+                <button id="tab-codex" class="tab-btn" type="button">藏品图鉴</button>
+                <button id="btn-salvage-low" class="tab-btn tab-warn" type="button">熔炼低阶</button>
+              </div>
+              <div class="armory-res">
+                <span>强化石 <b id="armory-stones">0</b></span>
+                <span>碎片 <b id="armory-chips">0</b></span>
+              </div>
+              <button class="modal-close" data-close="modal-armory" type="button">关闭</button>
+            </div>
+          </div>
+          <!-- 个人穿戴装备快捷条（局内/营地通用：实时查看主副枪与穿戴/强化头盔防具核心！） -->
+          <div id="armory-gear-strip" class="armory-gear-strip"></div>
+          <div id="armory-bag-view" class="armory-split">
+            <div id="armory-detail" class="armory-detail scroll-y"></div>
+            <div id="armory-grid" class="armory-grid scroll-y"></div>
+          </div>
+          <div id="armory-gear-view" class="forge-list scroll-y hidden"></div>
+          <div id="armory-forge-view" class="forge-list scroll-y hidden"></div>
+          <div id="armory-codex-view" class="codex-grid scroll-y hidden"></div>
+        </div>
+      </div>
+
+      <!-- 3. 三分支连线天赋树 -->
+      <div id="modal-talent" class="modal hidden">
+        <div class="modal-panel modal-wide">
+          <div class="modal-header">
+            <div class="modal-title">生存者三分支天赋树</div>
+            <div class="armory-top-right">
+              <div class="armory-res"><span>可用强化石 <b id="talent-stones">0</b></span></div>
+              <button class="modal-close" data-close="modal-talent" type="button">关闭</button>
+            </div>
+          </div>
+          <div id="talent-tree" class="talent-tree scroll-y"></div>
+        </div>
+      </div>
+
+      <!-- 4. 升级三选一肉鸽神技 -->
+      <div id="modal-skills" class="modal hidden">
+        <div class="modal-panel modal-medium">
+          <div class="modal-header">
+            <div class="modal-title">战地晋升 · 抉择一项肉鸽神技</div>
+          </div>
+          <div id="skill-choices" class="skill-choices"></div>
+        </div>
+      </div>
+
+      <!-- 5. 首次阵亡发笔记核爆复活 -->
+      <div id="modal-revive" class="modal hidden">
+        <div class="modal-panel modal-small">
+          <div class="modal-header">
+            <div class="modal-title">绝境余烬 · 紧急救援</div>
+          </div>
+          <p class="modal-desc">你的生命值已见底！发布一条突围笔记即可触发【满血 + 满护盾 + 全屏巅峰核爆】，瞬间蒸发周围尸海继续征战！</p>
+          <div class="modal-btn-row">
+            <button id="btn-revive-share" class="btn-metal btn-gold" type="button">发布笔记满血复活</button>
+            <button id="btn-revive-giveup" class="btn-metal" type="button">放弃并结算</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 战局结算与已回收神枪战利品展示 -->
+      <div id="modal-result" class="modal hidden">
+        <div class="modal-panel modal-medium">
+          <div class="modal-header">
+            <div id="result-title" class="modal-title">孤城突围 · 战捷凯旋</div>
+          </div>
+          <div id="result-stats" class="result-stats scroll-y"></div>
+          <div class="modal-btn-row">
+            <button id="btn-save-poster" class="btn-metal btn-gold" type="button">保存战报海报</button>
+            <button id="btn-retry" class="btn-metal btn-primary" type="button">再战一局</button>
+            <button id="btn-back-title" class="btn-metal" type="button">返回个人营地</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. 全网战力排行榜 -->
+      <div id="modal-rank" class="modal hidden">
+        <div class="modal-panel modal-medium">
+          <div class="modal-header">
+            <div class="modal-title">孤城幸存者战力榜</div>
+            <div class="armory-top-right">
+              <span id="rank-sync-status" class="rank-sync-pill">检测连接...</span>
+              <button id="btn-rank-sync" class="btn-mini btn-mini-gold" style="margin-right:6px" type="button">同步战绩</button>
+              <button class="modal-close" data-close="modal-rank" type="button">关闭</button>
+            </div>
+          </div>
+          <div id="rank-my-bar" class="rank-my-bar"></div>
+          <div id="rank-list" class="rank-list scroll-y"></div>
+        </div>
+      </div>
+
+      <!-- 8. 关注作者领普通步枪与「开创者」称号 -->
+      <div id="modal-follow" class="modal hidden">
+        <div class="modal-panel modal-small">
+          <div class="modal-header">
+            <div class="modal-title">关注创作者 · 领取开创者补给</div>
+            <button class="modal-close" data-close="modal-follow" type="button">关闭</button>
+          </div>
+          <p class="modal-desc">关注作者即可立刻领取【普通突击步枪 · 余烬步枪 + 专属限定称号「开创者」（攻击+5% / 暴击+3%）+ 20 强化石】，助你顺利度过断桥开局！</p>
+          <div class="modal-btn-row">
+            <button id="btn-follow-go" class="btn-metal btn-gold" type="button">一键关注并领取</button>
+            <button class="btn-metal" data-close="modal-follow" type="button">稍后再说</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8.1 称号佩戴弹窗（仅展示已解锁称号，未获得不显示！） -->
+      <div id="modal-titles" class="modal hidden">
+        <div class="modal-panel modal-medium">
+          <div class="modal-header">
+            <div class="modal-title">个人荣誉称号（仅显示已获得）</div>
+            <button class="modal-close" data-close="modal-titles" type="button">关闭</button>
+          </div>
+          <div id="titles-list" class="forge-list scroll-y"></div>
+        </div>
+      </div>
+
+      <!-- 8.2 重工军需商店（战功点购置无人机与战车改装，绝非免费掉落！） -->
+      <div id="modal-drones" class="modal hidden">
+        <div class="modal-panel modal-wide">
+          <div class="modal-header">
+            <div class="modal-title">重工军需商店 · 无人机与战车改装</div>
+            <div class="armory-top-right">
+              <div class="armory-res"><span>持有战功点 <b id="shop-merit">0</b></span></div>
+              <button class="modal-close" data-close="modal-drones" type="button">关闭</button>
+            </div>
+          </div>
+          <div id="drones-list" class="forge-list scroll-y"></div>
+        </div>
+      </div>
+
+      <!-- 8.3 20 级解锁专属伙伴系统（其余三选一白板小手枪培养！） -->
+      <div id="modal-partner" class="modal hidden">
+        <div class="modal-panel modal-medium">
+          <div class="modal-header">
+            <div class="modal-title">专属并肩伙伴（账号 Lv.20 解锁 · 初始白板小手枪）</div>
+            <button class="modal-close" data-close="modal-partner" type="button">关闭</button>
+          </div>
+          <div id="partner-body" class="forge-list scroll-y"></div>
+        </div>
+      </div>
+
+      <!-- 9. 战术系统设置 -->
+      <div id="modal-settings" class="modal hidden">
+        <div class="modal-panel modal-small">
+          <div class="modal-header">
+            <div class="modal-title">战术系统设置</div>
+            <button class="modal-close" data-close="modal-settings" type="button">关闭</button>
+          </div>
+          <div class="settings-list scroll-y">
+            <div class="setting-row">
+              <label for="set-master">主音量</label>
+              <input id="set-master" type="range" min="0" max="100" value="80" />
+              <span id="val-master">80%</span>
+            </div>
+            <div class="setting-row">
+              <label for="set-sfx">枪械与爆炸音效</label>
+              <input id="set-sfx" type="range" min="0" max="100" value="80" />
+              <span id="val-sfx">80%</span>
+            </div>
+            <div class="setting-row">
+              <label for="set-music">战斗背景音乐</label>
+              <input id="set-music" type="range" min="0" max="100" value="55" />
+              <span id="val-music">55%</span>
+            </div>
+            <div class="setting-row">
+              <label>特效画质</label>
+              <div class="seg-group" id="set-quality-group">
+                <button class="seg-btn" data-q="low" type="button">流畅</button>
+                <button class="seg-btn" data-q="medium" type="button">均衡</button>
+                <button class="seg-btn active" data-q="high" type="button">极致</button>
+              </div>
+            </div>
+            <div class="setting-row">
+              <label>实时帧率显示</label>
+              <button id="btn-toggle-fps" class="seg-btn" type="button">已关闭</button>
+            </div>
+            <div class="setting-row">
+              <label>击杀与爆炸震动</label>
+              <button id="btn-toggle-vib" class="seg-btn active" type="button">已开启</button>
+            </div>
+            <div class="setting-row">
+              <label>重置本地存档</label>
+              <button id="btn-reset-save" class="btn-mini btn-mini-danger" type="button">清空重来</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部轻量提示条（绝不遮挡顶部标签与 HUD） -->
+      <div id="toast" class="toast hidden"></div>
+    </div>
+  </div>
+
+  <script src="audio.js?v=6"></script>
+  <script src="data.js?v=6"></script>
+  <script src="engine.js?v=6"></script>
+  <script src="renderer.js?v=6"></script>
+  <script src="app.js?v=6"></script>
+</body>
+</html>

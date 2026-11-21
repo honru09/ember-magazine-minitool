@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <linearGradient id="m" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#60718d"/><stop offset="50%" stop-color="#283142"/><stop offset="100%" stop-color="#151a24"/>
+    </linearGradient>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ffbe55"/><stop offset="100%" stop-color="#b85418"/>
+    </linearGradient>
+  </defs>
+  <polygon points="12,3 88,3 97,12 97,88 88,97 12,97 3,88 3,12" fill="none" stroke="url(#b)" stroke-width="5"/>
+  <polygon points="14,7 86,7 93,14 93,86 86,93 14,93 7,86 7,14" fill="none" stroke="url(#m)" stroke-width="3"/>
+  <path d="M3,24 L3,12 L12,3 L24,3 M76,3 L88,3 L97,12 L97,24 M97,76 L97,88 L88,97 L76,97 M24,97 L12,97 L3,88 L3,76" fill="none" stroke="#ffe799" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="11" cy="11" r="2.6" fill="#ffe082" stroke="#0c0f15" stroke-width="1.2"/>
+  <circle cx="89" cy="11" r="2.6" fill="#ffe082" stroke="#0c0f15" stroke-width="1.2"/>
+  <circle cx="11" cy="89" r="2.6" fill="#ffe082" stroke="#0c0f15" stroke-width="1.2"/>
+  <circle cx="89" cy="89" r="2.6" fill="#ffe082" stroke="#0c0f15" stroke-width="1.2"/>
+</svg>
